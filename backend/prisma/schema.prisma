@@ -18,4 +18,5 @@ model user {
   name      String @db.VarChar(191)
   email     String @unique @db.VarChar(191)
   password  String 
+  mbtiResult String? @db.VarChar(4)
 }

@@ -41,9 +41,10 @@ const Signin = () => {
       try {
         const response = await axios.post("/signin", user);
   
-        // 🚨 Pastikan backend benar-benar mengembalikan status 401 untuk login gagal!
         if (response.status === 200 && response.data.token) {
           localStorage.setItem("token", response.data.token);
+          localStorage.setItem("userId", response.data.user.id);
+          console.log("user id", response.data.user.id);
           alert("Login Successful!");
           console.log("Login Successful!");
           navigate("/dashboard");

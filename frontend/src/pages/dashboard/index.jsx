@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom"; // 🔹 Tambahkan Outlet
-import { getUserProfile, isAuthenticated } from "../../auth";
+import { fetchUserProfile, isAuthenticated } from "../../auth";
 import { Box, Button, Container, Paper, Typography } from "@mui/material";
 
 const Dashboard = () => {
@@ -15,7 +15,7 @@ const Dashboard = () => {
         return;
       }
 
-      const userProfile = await getUserProfile();
+      const userProfile = await fetchUserProfile();
       if (!userProfile) {
         navigate("/signin");
       } else {

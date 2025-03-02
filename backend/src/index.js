@@ -5,6 +5,7 @@ const cors = require("cors");
 const authController = require("./auth/auth.controller");
 const userController = require("./user/user.controller");
 const authenticateToken = require("./middleware/auth");
+const mbtiController  = require("./mbti/mbti.controller");
 
 const app = express();
 app.use(express.json());
@@ -17,7 +18,10 @@ app.post("/signup", authController.signUp);
 app.post("/signin", authController.signIn);
 
 app.get("/users", userController.getAllUsers);
-app.get("/profile", authenticateToken, userController.getUserProfile);
+app.get("/users/:id", authenticateToken, userController.getUserById);
+
+// app.post("/mbti-test", authenticateToken, mbtiController.getMBTIResult);
+app.post("/mbti-test", mbtiController.getMBTIResult);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
