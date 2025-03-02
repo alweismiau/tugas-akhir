@@ -22,6 +22,7 @@ app.get("/users/:id", authenticateToken, userController.getUserById);
 
 // app.post("/mbti-test", authenticateToken, mbtiController.getMBTIResult);
 app.post("/mbti-test", mbtiController.getMBTIResult);
+app.post("/update-mbti", authenticateToken, userController.updateMBTIResult); 
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

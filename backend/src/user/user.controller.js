@@ -1,37 +1,35 @@
 const prisma = require("../db");
 
-// ✅ Endpoint untuk mendapatkan profil user yang sedang login
 const getUserById = async (req, res) => {
-//   try {
-//     const userId = req.user.id; // ID dari token JWT
+// try {
+//   const { id } = req.params;
 
-//     const user = await prisma.user.findUnique({
-//       where: { id: userId },
-//       select: { id: true, name: true, email: true, mbtiResult: true }, 
-//     });
+//   const user = await prisma.user.findUnique({
+//     where: { id: parseInt(id) }, 
+//     select: { id: true, name: true, email: true, mbtiResult: true }, 
+//   });
 
-//     if (!user) {
-//       return res.status(404).json({ message: "User not found" });
-//     }
-
-//     res.status(200).json({ user });
-//   } catch (error) {
-//     res.status(500).json({ message: "Server error", error });
+//   if (!user) {
+//     return res.status(404).json({ message: "User not found" });
 //   }
-// };
+
+//   res.status(200).json(user);
+// } catch (error) {
+//   res.status(500).json({ message: "Server error", error: error.message });
+// }
 try {
-  const { id } = req.params;
+  const userId = req.user.id; // ID dari token JWT
 
   const user = await prisma.user.findUnique({
-    where: { id: parseInt(id) }, 
-    select: { id: true, name: true, email: true, mbtiResult: true }, 
+    where: { id: userId },
+    select: { id: true, name: true, email: true, mbtiResult: true },
   });
 
   if (!user) {
     return res.status(404).json({ message: "User not found" });
   }
 
-  res.status(200).json(user);
+  res.status(200).json({ user });
 } catch (error) {
   res.status(500).json({ message: "Server error", error: error.message });
 }
@@ -52,6 +50,25 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+const updateMBTIResult = async (req, res) => {
+  try {
+    const userId = req.user.id; // ID dari token JWT
+    const { mbtiResult } = req.body; // Hasil MBTI dari frontend
 
+    if (!mbtiResult || mbtiResult.length !== 4) {
+      return res.status(400).json({ message: "Invalid MBTI result" });
+    }
 
-module.exports = { getUserById, getAllUsers };
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { mbtiResult },
+      select: { id: true, name: true, email: true, mbtiResult: true },
+    });
+
+    res.status(200).json({ message: "MBTI result updated successfully", user: updatedUser });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+module.exports = { getUserById, getAllUsers, updateMBTIResult};

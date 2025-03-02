@@ -32,6 +32,10 @@ const Dashboard = () => {
   };
 
   if (!user) return <p>Loading...</p>;
+  
+  const handleMBTITest = () => {
+    navigate("/dashboard/mbti-test");
+  };
 
   return (
     <Box

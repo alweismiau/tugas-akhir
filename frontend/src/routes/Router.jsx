@@ -16,7 +16,7 @@ export const Router = createBrowserRouter([
     path: "/dashboard",
     element: <PrivateRoute element={<Dashboard />} />,
     children: [
-      { path: "mbti-test", element: <TestMBTI /> }, 
+      { path: "mbti-test", element: <PrivateRoute element={<TestMBTI />} /> }, 
     ],
   },
   { path: "*", element: <Navigate to="/signin" replace /> },
