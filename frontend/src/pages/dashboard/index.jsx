@@ -15,11 +15,11 @@ const Dashboard = () => {
         return;
       }
 
-      const userProfile = await fetchUserProfile();
-      if (!userProfile) {
+      const getUserById = await fetchUserProfile();
+      if (!getUserById) {
         navigate("/signin");
       } else {
-        setUser(userProfile);
+        setUser(getUserById);
       }
     }
 

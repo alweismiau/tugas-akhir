@@ -1,6 +1,6 @@
 const authService = require("./auth.service");
 
-// ✅ Sign Up Endpoint
+
 const signUp = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -11,14 +11,14 @@ const signUp = async (req, res) => {
   }
 };
 
-// ✅ Sign In Endpoint (diperbaiki)
+
 const signIn = async (req, res) => {
   try {
     const { email, password } = req.body;
     const result = await authService.loginUser(email, password);
     res.status(200).json(result);
   } catch (error) {
-    res.status(401).json({ message: error.message }); // 🔥 Pastikan ini mengembalikan error yang benar!
+    res.status(401).json({ message: error.message }); 
   }
 };
 
