@@ -1,8 +1,8 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import SignIn from "../pages/auth/SignIn";
 import SignUp from "../pages/auth/SignUp";
-import Dashboard from "../pages/dashboard";
-import TestMBTI from "../pages/mbti"; 
+import Dashboard from "../pages/dashboard/Dashboard";
+import TestMBTI from "../pages/mbti/MBTI"; 
 import { isAuthenticated } from "../auth";
 
 const PrivateRoute = ({ element }) => {

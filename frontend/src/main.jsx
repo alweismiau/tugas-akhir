@@ -3,12 +3,12 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import {  RouterProvider } from 'react-router-dom'
 import { Router } from './routes/Router'
-// import { AuthContextProvider } from './context/auth/AuthContext'
+import Logo from './components/logo/Logo';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    {/* <AuthContextProvider> */}
+    {/* <img src={Logo} alt="Logo" className="logo" /> */}
+    <Logo />
     <RouterProvider router={Router}/>
-    {/* </AuthContextProvider> */}
   </StrictMode>,
 )

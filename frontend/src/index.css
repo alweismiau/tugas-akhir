@@ -22,13 +22,28 @@ a:hover {
   color: #535bf2;
 }
 
-/* body {
+body {
   margin: 0;
-  display: flex;
+  padding: 0;
+  /* display: flex; */
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
-} */
+  background-image: url("./assets/background/bg-image.png");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+.logo {
+  position: fixed;
+  top: 20px;
+  left: 40px;
+  width: 100px; 
+  height: auto;
+  z-index: 1000; 
+}
+
 
 h1 {
   font-size: 3.2em;

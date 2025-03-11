@@ -4,15 +4,15 @@ const Validation = (user) => {
     const password_pattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
   
     if (!user.email.trim()) {
-      errors.email = "Email is required";
+      errors.email = "Wajib memasukkan Email";
     } else if (!email_pattern.test(user.email)) {
-      errors.email = "Invalid email format";
+      errors.email = "Email tidak Valid";
     }
   
     if (!user.password.trim()) {
-      errors.password = "Password is required";
+      errors.password = "Wajib memasukkan Password";
     } else if (!password_pattern.test(user.password)) {
-      errors.password = "Password must contain at least 8 characters, including one letter and one number";
+      errors.password = "Password harus terdiri dari 8 karakter, termasuk 1 huruf dan 1 nomor";
     }
   
     return errors;

@@ -1,4 +1,3 @@
-# mbti_test.py
 def calculate_mbti(answers):
     """
     Fungsi untuk menghitung hasil MBTI berdasarkan jawaban user.
@@ -34,7 +33,6 @@ def calculate_mbti(answers):
         if answer in questions[i]:  
             scores[questions[i][answer]] += 1  
 
-    # Tentukan tipe MBTI
     mbti_result = (
         "E" if scores["E"] > scores["I"] else "I",
         "S" if scores["S"] > scores["N"] else "N",

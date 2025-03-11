@@ -1,40 +1,33 @@
-import React, { forwardRef } from "react";
-import Box from "@mui/material/Box";
-import { useTheme } from "@mui/material/styles";
-import { RouterLink } from "../../routes/RouterLink";
-import logoBlue from "../../assets/logo/logo-blue.png";
-import logoWhite from "../../assets/logo/logo-white.png";
+import React from 'react'
+import { Box } from "@mui/material";
+import LogoImage from "../../assets/logo/logo-blue.png";
 
-export const Logo = forwardRef(
-    ({ href = "/", disableLink = false, variant = "blue", sx, className, ...other }, ref) => {
-      const logoSrc = variant === "white" ? logoWhite : logoBlue;
-  
-      const baseStyles = {
-        flexShrink: 0,
-        display: "inline-flex",
-        verticalAlign: "middle",
-        width: 120, 
+const Logo = () => {
+  return (
+    <Box
+      component="img"
+      src={LogoImage}
+      alt="Logo"
+      sx={{
+        position: "fixed",
+        top: 20,
+        left: {
+          xs: 20, 
+          sm: 30, 
+          md: 40, 
+          // lg: 50, 
+        },
+        width: {
+          xs: 80, 
+          sm: 100, 
+          md: 120, 
+          // lg: 140, 
+        },
         height: "auto",
-        ...sx,
-      };
-  
-      return (
-        <Box
-          ref={ref}
-          component={disableLink ? "div" : RouterLink}
-          to={href}
-          className={`mnl__logo__root ${className || ""}`}
-          aria-label="logo"
-          sx={{
-            ...baseStyles,
-            ...(disableLink && { pointerEvents: "none" }),
-          }}
-          {...other}
-        >
-          <img src={logoSrc} alt="Logo" style={{ width: "100%", height: "auto" }} />
-        </Box>
-      );
-    }
-  );
+        zIndex: 1000,
+      }}
+    />
+  )
+}
 
-export default Logo;
+export default Logo

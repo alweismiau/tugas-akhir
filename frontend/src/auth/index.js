@@ -17,8 +17,9 @@ export const fetchUserProfile = async () => {
     const response = await axios.get(`http://localhost:3000/users/${userId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    console.log("Fetched User Profile:", response.data);
 
-    return response.data;
+    return response.data.user;
   } catch (error) {
     console.error("Error fetching user profile:", error);
     return null;

@@ -5,23 +5,23 @@ const Validation = (user) => {
   
     // Validasi Nama
     if (!user.name.trim()) {
-      errors.name = "Full name is required";
+      errors.name = "Wajib memasukkan Full name";
     } else if (user.name.length < 3) {
-      errors.name = "Name must be at least 3 characters long";
+      errors.name = "Nama harus minimal 3 huruf";
     }
   
     // Validasi Email
     if (!user.email.trim()) {
-      errors.email = "Email is required";
+      errors.email = "Wajib memasukkan Email";
     } else if (!email_pattern.test(user.email)) {
-      errors.email = "Invalid email format";
+      errors.email = "Email tidak Valid";
     }
   
     // Validasi Password
     if (!user.password.trim()) {
-      errors.password = "Password is required";
+      errors.password = "Wajib memasukkan Password";
     } else if (!password_pattern.test(user.password)) {
-      errors.password = "Password must contain at least 8 characters, including one letter and one number";
+      errors.password = "Password harus terdiri dari 8 karakter, termasuk 1 huruf dan 1 nomor";
     }
   
     return errors;
