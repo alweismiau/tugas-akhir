@@ -9,6 +9,12 @@ const CardContainer = ({ children }) => {
       sx={{
         p: 4,
         width: "100%",
+        minWidth: {
+          xs:350, 
+          sm: 500, 
+          md: 700, 
+          lg: 900, 
+        },
         maxWidth: {
           xs:350, 
           sm: 500, 

@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 import { Box } from "@mui/material";
 import LogoImage from "../../assets/logo/logo-blue.png";
 
@@ -10,24 +10,31 @@ const Logo = () => {
       alt="Logo"
       sx={{
         position: "fixed",
-        top: 20,
+        top:  {
+          xs: 10,
+          lg: 20,
+        },
         left: {
-          xs: 20, 
-          sm: 30, 
-          md: 40, 
-          // lg: 50, 
+          xs: "50%", 
+          sm: "50%", 
+          md: "50%", 
+          lg: 130, 
+        },
+        transform: {
+          xs: "translateX(-50%)", 
+          md: "translateX(-50%)", 
         },
         width: {
-          xs: 80, 
-          sm: 100, 
-          md: 120, 
-          // lg: 140, 
+          xs: 60,
+          sm: 80,
+          md: 100,
+          lg: 140,
         },
         height: "auto",
         zIndex: 1000,
       }}
     />
-  )
-}
+  );
+};
 
-export default Logo
+export default Logo;

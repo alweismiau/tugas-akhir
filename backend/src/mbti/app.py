@@ -11,8 +11,8 @@ def mbti_test():
         data = request.json
         answers = data.get("answers", [])
 
-        if not answers or len(answers) != 12:
-            return jsonify({"error": "Invalid input, must have 12 answers"}), 400
+        if not answers or len(answers) != 40:
+            return jsonify({"error": "Invalid input, must have 40 answers"}), 400
 
         result = calculate_mbti(answers)
         return jsonify({"mbti_result": result})  

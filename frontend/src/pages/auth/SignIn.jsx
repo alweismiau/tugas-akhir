@@ -67,7 +67,7 @@ const Signin = () => {
       <CardContainer>
         <FormHead
           variant="sign-in"
-          title="Sign In"
+          title="Masuk Akun"
           href="/signup"
           sx={{ mb: 4, textAlign: "center" }}
         />

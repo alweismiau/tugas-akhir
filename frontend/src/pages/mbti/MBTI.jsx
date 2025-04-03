@@ -2,78 +2,72 @@ import React, { useState } from "react";
 import axios from "axios";
 import {
   Box,
-  Button,
   Typography,
   Radio,
   FormControl,
   FormControlLabel,
   RadioGroup,
-  Container,
-  Paper,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import CustomContainer from "../../components/container/CustomContainer";
 import CardContainer from "../../components/card/CardContainer";
 import CustomButton from "../../components/button/CustomButton";
+import LogOutButton from "../../components/button/LogOutButton";
 
-const questions = [
-  [
-    "Saya merasa nyaman di keramaian.",
-    "Saya suka berdiskusi dalam kelompok.",
-    "Saya mudah berinteraksi dengan orang baru.",
-  ],
 
-  [
-    "Saya lebih suka mengandalkan fakta daripada intuisi.",
-    "Saya suka belajar dari pengalaman langsung.",
-    "Saya mengutamakan logika dalam keputusan.",
-  ],
+import {
+  questionsEI,
+  questionsNS,
+  questionsTF,
+  questionsPJ,
+} from "../../data/data";
 
-  [
-    "Saya lebih nyaman dengan jadwal yang terstruktur.",
-    "Saya sering merencanakan sesuatu sebelumnya.",
-    "Saya menikmati eksplorasi ide-ide baru.",
-  ],
-
-  [
-    "Saya membuat keputusan berdasarkan emosi.",
-    "Saya fleksibel dengan perubahan.",
-    "Saya menyukai improvisasi dibandingkan perencanaan.",
-  ],
+const allQuestions = [
+  ...questionsEI,
+  ...questionsNS,
+  ...questionsTF,
+  ...questionsPJ,
 ];
 
 const TestMBTI = () => {
   const [session, setSession] = useState(0);
-  const [answers, setAnswers] = useState(Array(12).fill(null));
-  const navigate = useNavigate();
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [answers, setAnswers] = useState(Array(allQuestions.length).fill(null));
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isFinished, setIsFinished] = useState(false);
 
-  const handleAnswerChange = (index, value) => {
+  const navigate = useNavigate();
+
+  const handleAnswerChange = (value) => {
     const updatedAnswers = [...answers];
-    updatedAnswers[session * 3 + index] = value;
+    updatedAnswers[currentQuestionIndex] = value;
     setAnswers(updatedAnswers);
   };
 
   const handleNext = () => {
-    if (session < 3) setSession(session + 1);
+    if (currentQuestionIndex < allQuestions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    }
   };
 
   const handleBack = () => {
-    if (session > 0) setSession(session - 1);
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(currentQuestionIndex - 1);
+    }
   };
 
   const handleSubmit = async () => {
     try {
       setLoading(true);
-      const response = await axios.post("http://localhost:3000/mbti-test", {
+      const response = await axios.post("http://localhost:5001/mbti-test", {
         answers,
       });
 
       if (response.data.mbti_result) {
         setResult(response.data.mbti_result);
         console.log("MBTI Response:", response.data);
-        setSession(4);
+        setIsFinished(true);
 
         await axios.post(
           "http://localhost:3000/update-mbti",
@@ -84,6 +78,8 @@ const TestMBTI = () => {
             },
           }
         );
+
+        setSession(40);
       } else {
         console.error("MBTI result is empty!");
       }
@@ -96,78 +92,58 @@ const TestMBTI = () => {
 
   return (
     <CustomContainer>
+      <LogOutButton/>
       <CardContainer>
-        <Typography variant="h5" fontWeight="bold" gutterBottom>
-          {session < 4 ? `Sesi ${session + 1}` : "Hasil MBTI"}
-        </Typography>
-
-        {session < 4 ? (
+        {isFinished ? (
           <>
-            {questions[session].map((question, index) => (
-              <FormControl key={index} sx={{ display: "block", my: 2 }}>
-                <Typography>{question}</Typography>
-                <RadioGroup
-                  row
-                  value={answers[session * 3 + index] || ""}
-                  onChange={(e) => handleAnswerChange(index, e.target.value)}
-                >
-                  <FormControlLabel value="ya" control={<Radio />} label="Ya" />
-                  <FormControlLabel
-                    value="tidak"
-                    control={<Radio />}
-                    label="Tidak"
-                  />
-                </RadioGroup>
-              </FormControl>
-            ))}
+            <Typography variant="h6" fontWeight="bold" gutterBottom>
+              Kamu adalah seorang
+            </Typography>
+            <Typography variant="h3" sx={{ fontWeight: "bold",  color: "#7BB5E8" }}>
+              {result}
+            </Typography>
+            <Typography variant="body1" sx={{ mt: 2, mb: 3, textAlign: "center" }}>
+              Ini adalah tipe kepribadian MBTI kamu berdasarkan jawaban yang kamu berikan 🙌
+            </Typography>
 
-            <Box
-              sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}
-            >
-              {session > 0 && (
-                <CustomButton
-                  text="Back"
-                  variant="outlined"
-                  onClick={handleBack}
-                />
-              )}
-              {session < 3 ? (
+            <CustomButton text="Masuk ke chatbot" onClick={() => navigate("/dashboard/chatbot")} />
+          </>
+        ) : (
+          <>
+            <Typography variant="subtitle1" fontWeight="bold" gutterBottom color="text.secondary">
+              Pertanyaan {currentQuestionIndex + 1} / {allQuestions.length}
+            </Typography>
+
+            <FormControl sx={{ display: "block", mb: 2 }}>
+              <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
+                {allQuestions[currentQuestionIndex].question}
+              </Typography>
+              <RadioGroup
+                value={answers[currentQuestionIndex] || ""}
+                onChange={(e) => handleAnswerChange(e.target.value)}
+              >
+                {allQuestions[currentQuestionIndex].options.map((option, index) => (
+                  <FormControlLabel key={index} value={option.value} control={<Radio />} label={option.text} />
+                ))}
+              </RadioGroup>
+            </FormControl>
+
+            <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3, gap: 2 }}>
+              {currentQuestionIndex > 0 && <CustomButton text="Back" onClick={handleBack} />}
+              {currentQuestionIndex < allQuestions.length - 1 ? (
                 <CustomButton
                   text="Next"
                   onClick={handleNext}
-                  disabled={answers
-                    .slice(session * 3, session * 3 + 3)
-                    .includes(null)}
+                  disabled={answers[currentQuestionIndex] === null}
                 />
               ) : (
                 <CustomButton
                   text={loading ? "Processing..." : "Submit"}
                   onClick={handleSubmit}
-                  disabled={
-                    loading ||
-                    answers.slice(session * 3, session * 3 + 3).includes(null)
-                  }
+                  disabled={loading || answers[currentQuestionIndex] === null}
                 />
               )}
             </Box>
-          </>
-        ) : (
-          <>
-            {session === 4 && result ? (
-              <>
-                <Typography variant="h6" sx={{ mt: 3 }}>
-                  Your MBTI Type: <strong>{result}</strong>
-                </Typography>
-                <CustomButton
-                  text="Back to Dashboard"
-                  onClick={() => navigate("/dashboard")}
-                />
-              </>
-            ) : session === 4 && !result ? (
-              <Typography variant="h6" sx={{ mt: 3, color: "red" }}>
-                Error retrieving MBTI result. Please try again.
-              </Typography>
-            ) : null}
           </>
         )}
       </CardContainer>

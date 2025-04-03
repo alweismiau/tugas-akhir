@@ -9,10 +9,10 @@ const FormFields = ({ sx, title, variant, href }) => {
         <Typography variant="h4">{title}</Typography>
   
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          {variant === 'sign-in' ? 'Don’t have an account? ' : 'Already have an account? '}
+          {variant === 'sign-in' ? 'Belum punya akun? ' : 'Sudah punya akun? '}
   
           <Link component={RouterLink} href={href} variant="subtitle2">
-            {variant === 'sign-in' ? 'Get started' : 'Sign in'}
+            {variant === 'sign-in' ? 'Buat akun' : 'Masuk'}
           </Link>
         </Typography>
       </Stack>

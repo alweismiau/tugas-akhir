@@ -6,6 +6,7 @@ const CustomContainer = ({ children, sx = {} }) => {
     <Box
       sx={{
         display: "flex",
+        width: "100vw",
         height: "100vh",
         alignItems: "center",
         justifyContent: "center",
