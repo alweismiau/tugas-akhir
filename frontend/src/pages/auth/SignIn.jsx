@@ -41,7 +41,8 @@ const Signin = () => {
         if (response.status === 200 && response.data.token) {
           localStorage.setItem("token", response.data.token);
           localStorage.setItem("userId", response.data.user.id);
-          console.log("user id", response.data.user.id);
+          console.log("user id:", response.data.user.id);
+          console.log("JWT Token:", response.data.token);
           alert("Login Successful!");
           console.log("Login Successful!");
           navigate("/dashboard");
@@ -61,6 +62,47 @@ const Signin = () => {
       }
     }
   };
+
+  // const handleSubmit = async (event) => {
+  //   event.preventDefault();
+  //   const validationErrors = Validation(user);
+  //   setErrors(validationErrors);
+  //   setServerError("");
+  //   console.log("validationErrors:", validationErrors); // <--- Tambahkan ini
+  
+  //   if (Object.keys(validationErrors).length === 0) {
+  //     setLoading(true);
+  //     try {
+  //       console.log("Sending request to /signin..."); // <--- Tambahkan ini
+  //       const response = await axios.post("/signin", user);
+  //       console.log("Response:", response); // <--- Tambahkan ini
+  
+  //       if (response.status === 200 && response.data.token) {
+  //         localStorage.setItem("token", response.data.token);
+  //         localStorage.setItem("userId", response.data.user.id);
+  //         console.log("user id", response.data.user.id);
+  //         console.log("JWT Token:", response.data.token);
+  //         alert("Login Successful!");
+  //         console.log("Login Successful!");
+  //         navigate("/dashboard");
+  //       } else {
+  //         setServerError(response.data.message || "Login failed");
+  //       }
+  //     } catch (error) {
+  //       console.log("Error on signin:", error); // <--- Tambahkan ini
+  //       if (error.response) {
+  //         setServerError(
+  //           error.response.data.message || "Invalid email or password"
+  //         );
+  //       } else {
+  //         setServerError("Network error, please try again later.");
+  //       }
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   }
+  // };
+  
 
   return (
    <CustomContainer>
