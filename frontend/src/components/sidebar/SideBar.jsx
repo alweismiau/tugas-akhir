@@ -1,13 +1,20 @@
+// SideBar.jsx (Updated)
 import React, { useState, useEffect } from "react";
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { fetchUserProfile, isAuthenticated } from "../../auth";
 import CustomButton from "../../components/button/CustomButton";
 import { Box, Typography, IconButton } from "@mui/material";
 import DriveFileRenameOutlineIcon from "@mui/icons-material/DriveFileRenameOutline";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import DeleteIcon from "@mui/icons-material/Delete";
 
-const SideBar = () => {
+const SideBar = ({
+  startNewChat,
+  chatHistories,
+  loadChatHistory,
+  deleteChatHistory,
+  deleteAllHistories,
+}) => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
@@ -32,6 +39,7 @@ const SideBar = () => {
   }, [navigate]);
 
   if (!user) return <p>Loading...</p>;
+
   return (
     <Box
       sx={{
@@ -64,6 +72,26 @@ const SideBar = () => {
           }}
         >
           <Typography variant="body2" color="text.secondary">
+            Nama User:
+          </Typography>
+          <Typography
+            variant="h5"
+            fontWeight="bold"
+            color="text.primary"
+            sx={{ mx: "auto" }}
+          >
+            {user.name}
+          </Typography>
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+            mt: 1,
+          }}
+        >
+          <Typography variant="body2" color="text.secondary">
             Tipe MBTI:
           </Typography>
           <Typography
@@ -79,12 +107,41 @@ const SideBar = () => {
           <Typography variant="body2" color="text.secondary">
             Riwayat
           </Typography>
-          <CustomButton
-            variant="text"
-            startIcon={<ChatBubbleOutlineIcon />}
-            text="Riwayat 1"
-            sx={{ fontSize: "14px" }}
-          />
+          {chatHistories.length === 0 ? (
+            <Typography variant="body2" color="text.secondary">
+              Tidak ada riwayat chat.
+            </Typography>
+          ) : (
+            chatHistories.map((history, index) => (
+              <Box
+                key={history.id}
+                sx={{ display: "flex", alignItems: "center", gap: 1 }}
+              >
+                <CustomButton
+                  variant="text"
+                  startIcon={<ChatBubbleOutlineIcon />}
+                  text={`Riwayat ${index + 1}`}
+                  onClick={() => loadChatHistory(history.id)}
+                  sx={{ fontSize: "14px", flexGrow: 1 }}
+                />
+                <IconButton
+                  onClick={() => deleteChatHistory(history.id)}
+                  sx={{ color: "red" }}
+                >
+                  <DeleteIcon />
+                </IconButton>
+              </Box>
+            ))
+          )}
+          {chatHistories.length > 0 && (
+            <CustomButton
+              variant="text"
+              startIcon={<DeleteIcon />}
+              text="Hapus Semua Riwayat"
+              onClick={deleteAllHistories}
+              sx={{ fontSize: "14px", color: "red", mt: 1 }}
+            />
+          )}
         </Box>
       </Box>
 
@@ -92,6 +149,7 @@ const SideBar = () => {
         <CustomButton
           startIcon={<DriveFileRenameOutlineIcon />}
           text="Chat Baru"
+          onClick={startNewChat}
         />
       </Box>
     </Box>

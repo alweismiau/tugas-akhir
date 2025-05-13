@@ -41,7 +41,7 @@ const CustomButton = ({
       variant={variant}
       type={type}
       fullWidth
-      startIcon={startIcon || undefined}
+      startIcon={startIcon}
       onClick={onClick}
       disabled={disabled}
       sx={{
