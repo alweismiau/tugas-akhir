@@ -22,6 +22,7 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import SendIcon from "@mui/icons-material/Send";
+import "./Chatbot.css";
 
 const Chatbot = () => {
   const [messages, setMessages] = useState([]);
@@ -112,7 +113,6 @@ const Chatbot = () => {
       `chatHistories_${user.id}`,
       JSON.stringify(updatedHistories)
     );
-    // If the deleted chat is the current one, start a new chat
     if (currentChatId === chatId) {
       startNewChat();
     }
@@ -198,12 +198,58 @@ const Chatbot = () => {
     }
   };
 
-  const handleEndSession = () => {
+  useEffect(() => {
+    if (sessionEnded && summary) {
+      saveCurrentChat();
+    }
+  }, [summary, sessionEnded]);
+
+  // const handleEndSession = () => {
+  //   setSessionEnded(true);
+  //   setLoading(true);
+  //   const chatSummary = messages
+  //     .map((msg) => `${msg.sender === "user" ? "User" : "Bot"}: ${msg.text}`)
+  //     .join("\n");
+  //   setSummary(chatSummary);
+  // };
+
+    const handleEndSession = async () => {
     setSessionEnded(true);
-    const chatSummary = messages
-      .map((msg) => `${msg.sender === "user" ? "User" : "Bot"}: ${msg.text}`)
-      .join("\n");
-    setSummary(chatSummary);
+    setLoading(true);
+
+    try {
+      if (!user || !user.id || !currentChatId) {
+        throw new Error("User ID or Chat ID is missing");
+      }
+
+      console.log("Sending summary request with user_id:", user.id, "chat_id:", currentChatId);
+      const response = await axios.post(
+        `${API_URL}/summary`,
+        {
+          user_id: user.id,
+          chat_id: currentChatId,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const { summary: backendSummary } = response.data;
+      if (backendSummary && backendSummary !== "No chat history available for this session") {
+        setSummary(backendSummary);
+      } else {
+        setError("Tidak ada riwayat percakapan untuk dirangkum.");
+        setSummary(""); 
+      }
+    } catch (error) {
+      console.error("Error fetching summary:", error.response ? error.response.data : error.message);
+      setError("Gagal memuat rangkuman dari server.");
+      setSummary("");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!user) return <p>Loading...</p>;
@@ -288,18 +334,15 @@ const Chatbot = () => {
             </Typography>
           )}
           <Box
+            className="chat-container"
             sx={{
               flex: 1,
-              overflowY: "auto",
               width: "100%",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
               gap: 2,
-              mt: {
-                xs: 10,
-                lg: 2,
-              },
+              mt: 4,
             }}
           >
             {messages.length === 0 ? (
