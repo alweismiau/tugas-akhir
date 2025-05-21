@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 import {
   Box,
@@ -60,7 +60,7 @@ const TestMBTI = () => {
   const handleSubmit = async () => {
     try {
       setLoading(true);
-      const response = await axios.post("http://localhost:5001/mbti-test", {
+      const response = await axios.post("https://upward-midge-verbally.ngrok-free.app/mbti-test", {
         answers,
       });
 
@@ -70,7 +70,7 @@ const TestMBTI = () => {
         setIsFinished(true);
 
         await axios.post(
-          "http://localhost:3000/update-mbti",
+          "https://brave-wired-mastiff.ngrok-free.app/update-mbti",
           { mbtiResult: response.data.mbti_result },
           {
             headers: {

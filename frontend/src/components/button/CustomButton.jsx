@@ -12,26 +12,28 @@ const CustomButton = ({
 }) => {
   const styles = {
     contained: {
-      backgroundColor: "#212529",
+      backgroundColor: "#397ECB",
       color: "#fff",
       "&:hover": {
-        backgroundColor: "#343a40",
+        backgroundColor: "#7BB5E8",
       },
     },
     outlined: {
-      border: "2px solid #212529",
-      color: "#212529",
+      border: "2px solid #397ECB",
+      color: "#397ECB",
       backgroundColor: "transparent",
       "&:hover": {
-        backgroundColor: "#e0e0e0",
-        border: "2px solid #212529",
+        // backgroundColor: "#e0e0e0",
+        color: "#7BB5E8",
+        border: "2px solid #7BB5E8",
       },
     },
     text: {
-      color: "#212529",
+      color: "text.primary",
       backgroundColor: "transparent",
       "&:hover": {
         backgroundColor: "#e0e0e0",
+        color: "#397ECB",
       },
     },
   };

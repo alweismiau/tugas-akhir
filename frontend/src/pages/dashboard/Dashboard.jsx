@@ -63,28 +63,45 @@ const Dashboard = () => {
           alignItems: "center",
         }}
       >
-        <Typography variant="h5" color="#212529">
+        <Typography variant="h4" color="#212529">
           Selamat Datang
         </Typography>
         <Typography
-          variant="h5"
+          variant="h4"
           fontWeight="bold"
           sx={{ color: "#7BB5E8", ml: 1 }}
         >
-          {user.name}
+          {user.user.name}
         </Typography>
         <Typography variant="h5" color="#212529">
           !👋
         </Typography>
       </Box>
       <CardContainer>
-        <Typography variant="h6" fontWeight="bold" sx={{ textAlign: "center" }}>
-          Sebelum masuk ke fitur chatbot, yuk test MBTI kamu!
-        </Typography>
-        <Typography
-          variant="body2"
-          sx={{ color: "#6c757d", textAlign: "center", mb: 2 }}
+        {/* <Typography
+          variant="h6"
+          fontWeight="bold"
+          sx={{
+            maxWidth: {xs: "95%", sm: "70%", md: "80%"},
+            mx: "auto",
+          }}
         >
+          Sebelum masuk ke fitur chatbot, yuk <b>Tes MBTI</b> kamu!
+        </Typography> */}
+        <Typography
+          variant="subtitle1"
+          sx={{
+            color: "grey.600",
+            textAlign: "center",
+            maxWidth: {xs: "95%", sm: "70%", md: "80%", lg: "90%"},
+            mt: 1,
+            mb: 3,
+            mx: "auto",
+
+          }}
+        >
+          Sebelum masuk ke fitur chatbot, yuk 
+           <Box component="span" sx={{ color:"grey.900" }}> Tes MBTI</Box> kamu terlebih dulu!
           Tujuan dari test MBTI ini adalah agar chatbot mampu memberikan respons
           sesuai dengan tipe kepribadian kamu
         </Typography>
@@ -95,7 +112,7 @@ const Dashboard = () => {
             variant="outlined"
             text="Chatbot"
             onClick={handleChatbot}
-            disabled={!user.mbtiResult}
+            disabled={!user.user.mbtiResult}
           />
         </Box>
       </CardContainer>

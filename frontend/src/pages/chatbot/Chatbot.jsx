@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { fetchUserProfile, isAuthenticated } from "../../auth";
@@ -8,7 +8,6 @@ import LogOutButton from "../../components/button/LogOutButton";
 import SideBar from "../../components/sidebar/SideBar";
 import NotInterestedIcon from "@mui/icons-material/NotInterested";
 import CircularProgress from "@mui/material/CircularProgress";
-import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Box,
   Typography,
@@ -53,8 +52,8 @@ const Chatbot = () => {
       } else {
         setUser(getUserById);
         const storedHistories =
-          JSON.parse(localStorage.getItem(`chatHistories_${getUserById.id}`)) ||
-          [];
+          JSON.parse(localStorage.getItem(`chatHistories_${getUserById.user.id}`)) || [];
+
         setChatHistories(storedHistories);
         startNewChat();
       }
@@ -91,7 +90,7 @@ const Chatbot = () => {
 
     setChatHistories(updatedHistories);
     localStorage.setItem(
-      `chatHistories_${user.id}`,
+      `chatHistories_${user.user.id}`,
       JSON.stringify(updatedHistories)
     );
   };
@@ -110,7 +109,7 @@ const Chatbot = () => {
     const updatedHistories = chatHistories.filter((h) => h.id !== chatId);
     setChatHistories(updatedHistories);
     localStorage.setItem(
-      `chatHistories_${user.id}`,
+      `chatHistories_${user.user.id}`,
       JSON.stringify(updatedHistories)
     );
     if (currentChatId === chatId) {
@@ -120,27 +119,25 @@ const Chatbot = () => {
 
   const deleteAllHistories = () => {
     setChatHistories([]);
-    localStorage.removeItem(`chatHistories_${user.id}`);
+    localStorage.removeItem(`chatHistories_${user.user.id}`);
     startNewChat();
   };
 
   const handleSendMessage = async () => {
     if (input.trim() === "") return;
 
-    const userMessage = { text: input, sender: "user" };
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
     setLoading(true);
+    setInput("");
 
     try {
-      const mbtiResult = user.mbtiResult || "INTJ";
+      const mbtiResult = user.user.mbtiResult || "INTJ";
 
       const response = await axios.post(
         `${API_URL}/chat`,
         {
           user_input: input,
           mbti_result: mbtiResult,
-          user_id: user.id || "anonymous",
+          user_id: user.user.id || "anonymous",
           chat_id: currentChatId,
         },
         {
@@ -152,15 +149,21 @@ const Chatbot = () => {
 
       const { emotion, response: botReply, response_time } = response.data;
 
+      const userMessage = {
+        text: input,
+        sender: "user",
+        emotion: emotion,
+      };
+
       const botMessage = {
         text: botReply,
         sender: "bot",
-        emotion,
         response_time,
       };
 
       setMessages((prev) => {
-        const updatedMessages = [...prev, botMessage];
+        const updatedMessages = [...prev, userMessage, botMessage];
+        // const updatedMessages = [...prev, newMessages];
         const updatedHistories = [...chatHistories];
         const chatEntry = {
           id: currentChatId,
@@ -178,7 +181,7 @@ const Chatbot = () => {
         }
         setChatHistories(updatedHistories);
         localStorage.setItem(
-          `chatHistories_${user.id}`,
+          `chatHistories_${user.user.id}`,
           JSON.stringify(updatedHistories)
         );
         return updatedMessages;
@@ -204,29 +207,25 @@ const Chatbot = () => {
     }
   }, [summary, sessionEnded]);
 
-  // const handleEndSession = () => {
-  //   setSessionEnded(true);
-  //   setLoading(true);
-  //   const chatSummary = messages
-  //     .map((msg) => `${msg.sender === "user" ? "User" : "Bot"}: ${msg.text}`)
-  //     .join("\n");
-  //   setSummary(chatSummary);
-  // };
-
-    const handleEndSession = async () => {
+  const handleEndSession = async () => {
     setSessionEnded(true);
     setLoading(true);
 
     try {
-      if (!user || !user.id || !currentChatId) {
+      if (!user || !user.user.id || !currentChatId) {
         throw new Error("User ID or Chat ID is missing");
       }
 
-      console.log("Sending summary request with user_id:", user.id, "chat_id:", currentChatId);
+      console.log(
+        "Sending summary request with user_id:",
+        user.user.id,
+        "chat_id:",
+        currentChatId
+      );
       const response = await axios.post(
         `${API_URL}/summary`,
         {
-          user_id: user.id,
+          user_id: user.user.id,
           chat_id: currentChatId,
         },
         {
@@ -237,14 +236,20 @@ const Chatbot = () => {
       );
 
       const { summary: backendSummary } = response.data;
-      if (backendSummary && backendSummary !== "No chat history available for this session") {
+      if (
+        backendSummary &&
+        backendSummary !== "No chat history available for this session"
+      ) {
         setSummary(backendSummary);
       } else {
         setError("Tidak ada riwayat percakapan untuk dirangkum.");
-        setSummary(""); 
+        setSummary("");
       }
     } catch (error) {
-      console.error("Error fetching summary:", error.response ? error.response.data : error.message);
+      console.error(
+        "Error fetching summary:",
+        error.response ? error.response.data : error.message
+      );
       setError("Gagal memuat rangkuman dari server.");
       setSummary("");
     } finally {
@@ -255,7 +260,7 @@ const Chatbot = () => {
   if (!user) return <p>Loading...</p>;
 
   return (
-    <CustomContainer>
+    <CustomContainer variant="left">
       <AppBar
         sx={{
           display: { md: "none" },
@@ -347,16 +352,17 @@ const Chatbot = () => {
           >
             {messages.length === 0 ? (
               <Typography
-                variant="h4"
-                fontWeight="bold"
+                variant="h6"
+                fontWeight="regular"
                 sx={{
-                  background: "linear-gradient(to right, #2196F3, #4CAF50)",
+                  background: "linear-gradient(to right, #7BB5E8, #397ECB)",
                   WebkitBackgroundClip: "text",
-                  color: "transparent",
-                  my: "auto",
+                  WebkitTextFillColor: "transparent",
                   textAlign: "center",
+                  my: "auto",
                 }}
               >
+                Selamat datang di chatbot Tutur Laras. <br />
                 Bagaimana kabar kamu hari ini?
               </Typography>
             ) : (
@@ -377,21 +383,30 @@ const Chatbot = () => {
                     borderColor:
                       msg.sender === "user" ? "grey.300" : "grey.300",
                     borderRight:
-                      msg.sender === "user" ? "4px solid #8CBF0D" : "grey.300",
+                      msg.sender === "user" ? "4px solid #397ECB" : "grey.300",
                     borderLeft:
                       msg.sender === "user" ? "grey.300" : "4px solid #7BB5E8",
                     fontSize: "16px",
                   }}
                 >
+                  {msg.sender === "user" && (
+                    <Typography
+                      variant="body2"
+                      fontWeight="bold"
+                      color="grey.500"
+                      sx={{ mb: 1, textAlign: "right" }}
+                    >
+                      Emosi: {msg.emotion || "unknown"}
+                    </Typography>
+                  )}
                   {msg.sender === "bot" && (
                     <Typography
                       variant="body2"
                       fontWeight="bold"
                       color="grey.500"
-                      mb={1}
+                      sx={{ mb: 1 }}
                     >
-                      Emotion Predict: {msg.emotion || "unknown"} | Response
-                      Time: {msg.response_time || "N/A"}s
+                      Waktu: {msg.response_time || "N/A"}s
                     </Typography>
                   )}
                   {msg.text}
@@ -420,7 +435,7 @@ const Chatbot = () => {
                 <hr
                   style={{
                     width: "80%",
-                    margin: "20px 0",
+                    // margin: "20px 0",
                     border: "1px solid #ccc",
                   }}
                 />
@@ -428,10 +443,11 @@ const Chatbot = () => {
                   sx={{
                     width: { xs: "80%", lg: "80%" },
                     color: "grey.800",
-                    p: 2,
+                    // p: 2,
                     borderRadius: 2,
                     border: "2px solid grey.300",
                     mx: "auto",
+                    mb: 4,
                   }}
                 >
                   <Typography variant="h6" fontWeight="bold" mb={1}>
@@ -472,7 +488,7 @@ const Chatbot = () => {
               px: 2,
               p: 2,
               mx: "auto",
-              borderTop: "1px solid grey",
+              borderTop: "1px solid #ccc",
             }}
           >
             <TextField
@@ -484,17 +500,17 @@ const Chatbot = () => {
               onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
               disabled={loading || sessionEnded}
               sx={{
-                input: { color: sessionEnded ? "grey.400" : "grey.700" },
+                input: { color: sessionEnded ? "grey.800" : "grey.800" },
                 "& fieldset": {
-                  borderColor: sessionEnded ? "grey.400" : "grey.700",
+                  borderColor: sessionEnded ? "#7BB5E8" : "#397ECB",
                 },
                 "&:hover fieldset": {
-                  borderColor: sessionEnded ? "grey.400" : "grey.800",
+                  borderColor: sessionEnded ? "#7BB5E8" : "#397ECB",
                 },
               }}
             />
             <IconButton
-              sx={{ ml: 2, color: sessionEnded ? "grey.400" : "grey.800" }}
+              sx={{ ml: 2, color: sessionEnded ? "#7BB5E8" : "#397ECB" }}
               onClick={handleSendMessage}
               disabled={loading || sessionEnded}
             >
