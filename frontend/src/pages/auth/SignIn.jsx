@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Alert } from "@mui/material";
+import { Snackbar, Alert } from "@mui/material";
 import Validation from "./SignInValidation";
 import axios from "../../api/api";
 import CustomContainer from "../../components/container/CustomContainer";
@@ -18,6 +18,8 @@ const Signin = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState("");
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+
   const navigate = useNavigate();
 
   const handleInput = (event) => {
@@ -43,9 +45,13 @@ const Signin = () => {
           localStorage.setItem("userId", response.data.user.id);
           console.log("user id:", response.data.user.id);
           console.log("JWT Token:", response.data.token);
-          alert("Login Successful!");
-          console.log("Login Successful!");
-          navigate("/dashboard");
+          // alert("Login Successful!");
+          // console.log("Login Successful!");
+          // navigate("/dashboard");
+          setOpenSnackbar(true);
+          setTimeout(() => {
+            navigate("/dashboard");
+          }, 1500);
         } else {
           setServerError(response.data.message || "Login failed");
         }
@@ -63,50 +69,24 @@ const Signin = () => {
     }
   };
 
-  // const handleSubmit = async (event) => {
-  //   event.preventDefault();
-  //   const validationErrors = Validation(user);
-  //   setErrors(validationErrors);
-  //   setServerError("");
-  //   console.log("validationErrors:", validationErrors); // <--- Tambahkan ini
-  
-  //   if (Object.keys(validationErrors).length === 0) {
-  //     setLoading(true);
-  //     try {
-  //       console.log("Sending request to /signin..."); // <--- Tambahkan ini
-  //       const response = await axios.post("/signin", user);
-  //       console.log("Response:", response); // <--- Tambahkan ini
-  
-  //       if (response.status === 200 && response.data.token) {
-  //         localStorage.setItem("token", response.data.token);
-  //         localStorage.setItem("userId", response.data.user.id);
-  //         console.log("user id", response.data.user.id);
-  //         console.log("JWT Token:", response.data.token);
-  //         alert("Login Successful!");
-  //         console.log("Login Successful!");
-  //         navigate("/dashboard");
-  //       } else {
-  //         setServerError(response.data.message || "Login failed");
-  //       }
-  //     } catch (error) {
-  //       console.log("Error on signin:", error); // <--- Tambahkan ini
-  //       if (error.response) {
-  //         setServerError(
-  //           error.response.data.message || "Invalid email or password"
-  //         );
-  //       } else {
-  //         setServerError("Network error, please try again later.");
-  //       }
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   }
-  // };
-  
-
   return (
-   <CustomContainer>
+    <CustomContainer>
       <CardContainer>
+        <Snackbar
+          open={openSnackbar}
+          autoHideDuration={1500}
+          onClose={() => setOpenSnackbar(false)}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <Alert
+            onClose={() => setOpenSnackbar(false)}
+            severity="success"
+            sx={{ width: "100%" }}
+          >
+            Berhasil masuk!
+          </Alert>
+        </Snackbar>
+
         <FormHead
           variant="sign-in"
           title="Masuk Akun"
@@ -129,7 +109,7 @@ const Signin = () => {
             values={user}
             handleChange={handleInput}
             errors={errors}
-            />
+          />
           <CustomButton
             sx={{ mt: 2 }}
             type="submit"

@@ -55,7 +55,7 @@ const CustomButton = ({
         fontSize: "1rem",
         borderRadius: "8px",
         padding: "12px 12px",
-        px: 4,
+        px: 2,
         ...styles[variant],
         ...sx,
       }}

@@ -71,7 +71,8 @@ const Dashboard = () => {
           fontWeight="bold"
           sx={{ color: "#7BB5E8", ml: 1 }}
         >
-          {user.user.name}
+          {user.user.name.charAt(0).toUpperCase() + user.user.name.slice(1)}
+
         </Typography>
         <Typography variant="h5" color="#212529">
           !👋

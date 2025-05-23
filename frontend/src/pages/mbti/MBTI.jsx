@@ -13,15 +13,19 @@ import CustomContainer from "../../components/container/CustomContainer";
 import CardContainer from "../../components/card/CardContainer";
 import CustomButton from "../../components/button/CustomButton";
 import LogOutButton from "../../components/button/LogOutButton";
-
+import MBTIResultCard from "../../components/mbti/MBTIResultCard";
 
 import {
   questionsEI,
   questionsNS,
   questionsTF,
   questionsPJ,
+  mbtiDescriptions,
+  MBTIImages,
 } from "../../data/data";
 
+const FLASK_URL = "https://upward-midge-verbally.ngrok-free.app";
+const EXPRESS_URL = "https://brave-wired-mastiff.ngrok-free.app";
 const allQuestions = [
   ...questionsEI,
   ...questionsNS,
@@ -60,9 +64,12 @@ const TestMBTI = () => {
   const handleSubmit = async () => {
     try {
       setLoading(true);
-      const response = await axios.post("https://upward-midge-verbally.ngrok-free.app/mbti-test", {
-        answers,
-      });
+      const response = await axios.post(
+        `${FLASK_URL}/mbti-test`,
+        {
+          answers,
+        }
+      );
 
       if (response.data.mbti_result) {
         setResult(response.data.mbti_result);
@@ -70,7 +77,7 @@ const TestMBTI = () => {
         setIsFinished(true);
 
         await axios.post(
-          "https://brave-wired-mastiff.ngrok-free.app/update-mbti",
+          `${EXPRESS_URL}/update-mbti`,
           { mbtiResult: response.data.mbti_result },
           {
             headers: {
@@ -92,25 +99,22 @@ const TestMBTI = () => {
 
   return (
     <CustomContainer>
-      <LogOutButton/>
+      <LogOutButton />
       <CardContainer>
         {isFinished ? (
-          <>
-            <Typography variant="h6" fontWeight="bold" gutterBottom>
-              Kamu adalah seorang
-            </Typography>
-            <Typography variant="h3" sx={{ fontWeight: "bold",  color: "#7BB5E8" }}>
-              {result}
-            </Typography>
-            <Typography variant="body1" sx={{ mt: 2, mb: 3, textAlign: "center" }}>
-              Ini adalah tipe kepribadian MBTI kamu berdasarkan jawaban yang kamu berikan 🙌
-            </Typography>
-
-            <CustomButton text="Masuk ke chatbot" onClick={() => navigate("/dashboard/chatbot")} />
-          </>
+          <MBTIResultCard
+            result={result}
+            description={mbtiDescriptions[result]}
+            images={MBTIImages[result]}
+          />
         ) : (
           <>
-            <Typography variant="subtitle1" fontWeight="bold" gutterBottom color="text.secondary">
+            <Typography
+              variant="subtitle1"
+              fontWeight="bold"
+              gutterBottom
+              color="text.secondary"
+            >
               Pertanyaan {currentQuestionIndex + 1} / {allQuestions.length}
             </Typography>
 
@@ -122,14 +126,30 @@ const TestMBTI = () => {
                 value={answers[currentQuestionIndex] || ""}
                 onChange={(e) => handleAnswerChange(e.target.value)}
               >
-                {allQuestions[currentQuestionIndex].options.map((option, index) => (
-                  <FormControlLabel key={index} value={option.value} control={<Radio />} label={option.text} />
-                ))}
+                {allQuestions[currentQuestionIndex].options.map(
+                  (option, index) => (
+                    <FormControlLabel
+                      key={index}
+                      value={option.value}
+                      control={<Radio />}
+                      label={option.text}
+                    />
+                  )
+                )}
               </RadioGroup>
             </FormControl>
 
-            <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3, gap: 2 }}>
-              {currentQuestionIndex > 0 && <CustomButton text="Back" onClick={handleBack} />}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                mt: 3,
+                gap: 2,
+              }}
+            >
+              {currentQuestionIndex > 0 && (
+                <CustomButton text="Back" onClick={handleBack} />
+              )}
               {currentQuestionIndex < allQuestions.length - 1 ? (
                 <CustomButton
                   text="Next"

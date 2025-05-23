@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Alert } from "@mui/material";
+import { Snackbar, Alert } from "@mui/material";
 import Validation from "./SignUpValidation";
 import axios from "../../api/api";
 import CustomContainer from "../../components/container/CustomContainer";
@@ -15,6 +15,9 @@ const Signup = () => {
     email: "",
     password: "",
   });
+
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -38,8 +41,13 @@ const Signup = () => {
       setLoading(true);
       try {
         const response = await axios.post("/signup", user);
-        alert(response.data.message);
-        navigate("/signin");
+        // alert(response.data.message);
+        // navigate("/signin");
+        setSuccessMessage(response.data.message || "Pendaftaran berhasil!");
+        setOpenSnackbar(true);
+        setTimeout(() => {
+          navigate("/signin");
+        }, 2000);
       } catch (error) {
         setServerError(error.response?.data?.message || "Something went wrong");
       } finally {
@@ -51,6 +59,21 @@ const Signup = () => {
   return (
     <CustomContainer>
       <CardContainer>
+        <Snackbar
+          open={openSnackbar}
+          autoHideDuration={2000}
+          onClose={() => setOpenSnackbar(false)}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <Alert
+            onClose={() => setOpenSnackbar(false)}
+            severity="success"
+            sx={{ width: "100%" }}
+          >
+            {successMessage}
+          </Alert>
+        </Snackbar>
+
         <FormHead
           variant="sign-up"
           title="Buat Akun"

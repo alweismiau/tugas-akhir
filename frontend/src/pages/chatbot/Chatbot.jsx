@@ -35,7 +35,8 @@ const Chatbot = () => {
   const [currentChatId, setCurrentChatId] = useState(null);
   const navigate = useNavigate();
   const [error, setError] = useState("");
-  const API_URL = "https://upward-midge-verbally.ngrok-free.app";
+  const FLASK_URL = "https://upward-midge-verbally.ngrok-free.app";
+  const EXPRESS_URL = "https://brave-wired-mastiff.ngrok-free.app";
 
   useEffect(() => {
     async function fetchProfile() {
@@ -51,10 +52,17 @@ const Chatbot = () => {
         navigate("/signin");
       } else {
         setUser(getUserById);
-        const storedHistories =
-          JSON.parse(localStorage.getItem(`chatHistories_${getUserById.user.id}`)) || [];
+        // const storedHistories =
+        //   JSON.parse(
+        //     localStorage.getItem(`chatHistories_${getUserById.user.id}`)
+        //   ) || [];
 
-        setChatHistories(storedHistories);
+        // setChatHistories(storedHistories);
+        const response = await axios.get(
+          `${EXPRESS_URL}/get-chats/${getUserById.user.id}`
+        );
+        setChatHistories(response.data);
+
         startNewChat();
       }
     }
@@ -89,12 +97,21 @@ const Chatbot = () => {
     }
 
     setChatHistories(updatedHistories);
-    localStorage.setItem(
-      `chatHistories_${user.user.id}`,
-      JSON.stringify(updatedHistories)
-    );
+    // localStorage.setItem(
+    //   `chatHistories_${user.user.id}`,
+    //   JSON.stringify(updatedHistories)
+    // );
   };
 
+  // const loadChatHistory = (chatId) => {
+  //   const chat = chatHistories.find((h) => h.id === chatId);
+  //   if (chat) {
+  //     setMessages(chat.messages);
+  //     setSummary(chat.summary || "");
+  //     setSessionEnded(!!chat.summary);
+  //     setCurrentChatId(chatId);
+  //   }
+  // };
   const loadChatHistory = (chatId) => {
     const chat = chatHistories.find((h) => h.id === chatId);
     if (chat) {
@@ -105,23 +122,29 @@ const Chatbot = () => {
     }
   };
 
-  const deleteChatHistory = (chatId) => {
+  const deleteChatHistory = async (chatId) => {
+  try {
+    await axios.delete(`${EXPRESS_URL}/delete-chat/${chatId}`);
     const updatedHistories = chatHistories.filter((h) => h.id !== chatId);
     setChatHistories(updatedHistories);
-    localStorage.setItem(
-      `chatHistories_${user.user.id}`,
-      JSON.stringify(updatedHistories)
-    );
     if (currentChatId === chatId) {
       startNewChat();
     }
-  };
+  } catch (err) {
+    console.error("Gagal menghapus chat:", err);
+  }
+};
 
-  const deleteAllHistories = () => {
+const deleteAllHistories = async () => {
+  try {
+    await axios.delete(`${EXPRESS_URL}/delete-all-chats/${user.user.id}`);
     setChatHistories([]);
-    localStorage.removeItem(`chatHistories_${user.user.id}`);
     startNewChat();
-  };
+  } catch (err) {
+    console.error("Gagal menghapus semua riwayat:", err);
+  }
+};
+
 
   const handleSendMessage = async () => {
     if (input.trim() === "") return;
@@ -133,7 +156,7 @@ const Chatbot = () => {
       const mbtiResult = user.user.mbtiResult || "INTJ";
 
       const response = await axios.post(
-        `${API_URL}/chat`,
+        `${FLASK_URL}/chat`,
         {
           user_input: input,
           mbti_result: mbtiResult,
@@ -161,6 +184,15 @@ const Chatbot = () => {
         response_time,
       };
 
+      await axios.post(`${EXPRESS_URL}/save-chat`, {
+        userId: user.user.id,
+        chatId: currentChatId,
+        text: input,
+        response: botReply,
+        emotion: emotion,
+        responseTime: response_time,
+      });
+
       setMessages((prev) => {
         const updatedMessages = [...prev, userMessage, botMessage];
         // const updatedMessages = [...prev, newMessages];
@@ -180,10 +212,10 @@ const Chatbot = () => {
           updatedHistories.push(chatEntry);
         }
         setChatHistories(updatedHistories);
-        localStorage.setItem(
-          `chatHistories_${user.user.id}`,
-          JSON.stringify(updatedHistories)
-        );
+        // localStorage.setItem(
+        //   `chatHistories_${user.user.id}`,
+        //   JSON.stringify(updatedHistories)
+        // );
         return updatedMessages;
       });
     } catch (error) {
@@ -200,6 +232,8 @@ const Chatbot = () => {
       setLoading(false);
     }
   };
+
+  
 
   useEffect(() => {
     if (sessionEnded && summary) {
@@ -223,7 +257,7 @@ const Chatbot = () => {
         currentChatId
       );
       const response = await axios.post(
-        `${API_URL}/summary`,
+        `${FLASK_URL}/summary`,
         {
           user_id: user.user.id,
           chat_id: currentChatId,
@@ -302,9 +336,17 @@ const Chatbot = () => {
           }}
         >
           {/* <SideBar /> */}
+          {/* <SideBar
+            startNewChat={startNewChat}
+            chatHistories={chatHistories}
+            loadChatHistory={loadChatHistory}
+            deleteChatHistory={deleteChatHistory}
+            deleteAllHistories={deleteAllHistories}
+          /> */}
           <SideBar
             startNewChat={startNewChat}
             chatHistories={chatHistories}
+            setChatHistories={setChatHistories}
             loadChatHistory={loadChatHistory}
             deleteChatHistory={deleteChatHistory}
             deleteAllHistories={deleteAllHistories}
@@ -313,9 +355,17 @@ const Chatbot = () => {
 
         <Drawer anchor="left" open={open} onClose={() => setOpen(false)}>
           {/* <SideBar /> */}
+          {/* <SideBar
+            startNewChat={startNewChat}
+            chatHistories={chatHistories}
+            loadChatHistory={loadChatHistory}
+            deleteChatHistory={deleteChatHistory}
+            deleteAllHistories={deleteAllHistories}
+          /> */}
           <SideBar
             startNewChat={startNewChat}
             chatHistories={chatHistories}
+            setChatHistories={setChatHistories}
             loadChatHistory={loadChatHistory}
             deleteChatHistory={deleteChatHistory}
             deleteAllHistories={deleteAllHistories}

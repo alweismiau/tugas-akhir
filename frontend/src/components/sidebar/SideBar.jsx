@@ -1,4 +1,3 @@
-// SideBar.jsx (Updated)
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchUserProfile, isAuthenticated } from "../../auth";
@@ -7,37 +6,52 @@ import { Box, Typography, IconButton } from "@mui/material";
 import DriveFileRenameOutlineIcon from "@mui/icons-material/DriveFileRenameOutline";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import DeleteIcon from "@mui/icons-material/Delete";
+import axios from "axios";
 import "../../pages/chatbot/Chatbot.css";
+const EXPRESS_URL = "https://brave-wired-mastiff.ngrok-free.app";
 
 const SideBar = ({
   startNewChat,
-  chatHistories,
   loadChatHistory,
   deleteChatHistory,
   deleteAllHistories,
+  setChatHistories,
 }) => {
   const [user, setUser] = useState(null);
+  const [fetchedHistories, setFetchedHistories] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    async function fetchProfile() {
+    async function fetchUserAndChatHistories() {
       if (!isAuthenticated()) {
-        console.log("User not authenticated, redirecting to Sign In");
         navigate("/signin");
         return;
       }
 
-      const getUserById = await fetchUserProfile();
-      console.log("User Profile Data:", getUserById);
-      if (!getUserById) {
-        navigate("/signin");
-      } else {
-        setUser(getUserById);
+      try {
+        const userData = await fetchUserProfile();
+        if (!userData || !userData.user?.id) {
+          navigate("/signin");
+          return;
+        }
+
+        setUser(userData);
+        const userId = userData.user.id;
+
+        const response = await axios.get(`${EXPRESS_URL}/get-chats/${userId}`, {
+          headers: { "ngrok-skip-browser-warning": "69420" },
+        });
+        const data = Array.isArray(response.data) ? response.data : [];
+
+        setFetchedHistories(data);
+        setChatHistories(data);
+      } catch (error) {
+        console.error("❌ Gagal mengambil data user atau riwayat:", error);
       }
     }
 
-    fetchProfile();
-  }, [navigate]);
+    fetchUserAndChatHistories();
+  }, [navigate, setChatHistories]);
 
   if (!user) return <p>Loading...</p>;
 
@@ -58,10 +72,7 @@ const SideBar = ({
         sx={{
           display: "flex",
           flexDirection: "column",
-          mt: {
-            xs: 4,
-            lg: 16,
-          },
+          mt: { xs: 4, lg: 16 },
           gap: 2,
           alignItems: "left",
         }}
@@ -71,9 +82,11 @@ const SideBar = ({
             Nama User:
           </Typography>
           <Typography variant="h5" color="text.primary" sx={{ mt: 1 }}>
-            {user.user.name}
+            {user?.user?.name?.charAt(0).toUpperCase() +
+              user?.user?.name?.slice(1)}
           </Typography>
         </Box>
+
         <Box sx={{ display: "flex", flexDirection: "column" }}>
           <Typography variant="body2" color="text.secondary">
             Tipe MBTI:
@@ -82,6 +95,7 @@ const SideBar = ({
             {user.user.mbtiResult}
           </Typography>
         </Box>
+
         <Box sx={{ display: "flex", flexDirection: "column" }}>
           <Typography variant="body2" color="text.secondary">
             Riwayat
@@ -100,34 +114,15 @@ const SideBar = ({
               mt: 2,
             }}
           >
-            {chatHistories.length > 0 && (
-              <CustomButton
-                variant="outlined"
-                startIcon={<DeleteIcon />}
-                text="Hapus Semua Riwayat"
-                onClick={deleteAllHistories}
-                sx={{
-                  fontSize: "12px",
-                  border: "red solid 2px",
-                  color: "red",
-                  my: 1,
-                  "&:hover": {
-                    border: "2px solid #EE4E4E",
-                    color: "#EE4E4E",
-                  },
-                }}
-              />
-            )}
-
-            {chatHistories.length === 0 ? (
+            {fetchedHistories.length === 0 ? (
               <Typography variant="body2" color="text.secondary">
                 Tidak ada riwayat chat.
               </Typography>
             ) : (
-              chatHistories.map((history, index) => (
+              fetchedHistories.map((history, index) => (
                 <Box
                   key={history.id}
-                  sx={{ display: "flex", alignItems: "center" }}
+                  sx={{ display: "flex", alignItems: "center", mb: 1 }}
                 >
                   <CustomButton
                     variant="text"
@@ -136,6 +131,7 @@ const SideBar = ({
                     onClick={() => loadChatHistory(history.id)}
                     sx={{ fontSize: "14px", flexGrow: 1 }}
                   />
+
                   <IconButton
                     onClick={() => deleteChatHistory(history.id)}
                     sx={{ color: "red", "&:hover": { color: "#EE4E4E" } }}

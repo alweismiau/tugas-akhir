@@ -138,7 +138,7 @@ const questionsNS = [
     ],
   },
   {
-    question: "Kamu yakin bahwa bungee jumping aman dilakukan dari…",
+    question: "Kamu yakin bahwa bungee jumping (terjun lenting) aman dilakukan dari…",
     options: [
       { text: "Firasatmu berkata hal tersebut aman", value: "N" },
       {
@@ -333,10 +333,53 @@ const questionsPJ = [
   {
     question: "Menurutmu, kamu adalah orang yang…",
     options: [
-      { text: "Easy-going", value: "P" },
-      { text: "Determined", value: "J" },
+      { text: "Easy-going / santai", value: "P" },
+      { text: "Determined / gigih / memiliki tekad yang besar", value: "J" },
     ],
   },
 ];
 
-export { questionsEI, questionsNS, questionsTF, questionsPJ };
+const mbtiDescriptions = {
+  ISTJ: "ISTJ adalah sosok yang bertanggung jawab, teliti, dan menghargai struktur serta tradisi. Mereka dikenal dapat diandalkan dan logis dalam menyelesaikan tugas.",
+  ISFJ: "ISFJ adalah pribadi yang setia, perhatian, dan penuh empati. Mereka senang membantu orang lain dengan cara yang tenang dan praktis.",
+  INFJ: "INFJ adalah individu visioner yang penuh empati dan memiliki komitmen kuat terhadap nilai-nilai. Mereka sering menjadi penasihat atau penggerak perubahan.",
+  INTJ: "INTJ adalah pemikir strategis yang mandiri dan analitis. Mereka senang merencanakan jangka panjang dan mencari cara-cara efisien untuk mencapai tujuan.",
+  
+  ISTP: "ISTP adalah tipe yang logis, praktis, dan suka mengeksplorasi bagaimana sesuatu bekerja. Mereka cenderung tenang tapi suka tantangan teknis dan langsung.",
+  ISFP: "ISFP adalah pribadi yang artistik, lembut, dan hidup di saat ini. Mereka sangat menghargai kebebasan dan keindahan dalam hidup.",
+  INFP: "INFP adalah idealis yang penuh empati dan imajinatif. Mereka termotivasi oleh nilai-nilai pribadi dan sering ingin membuat dunia menjadi tempat yang lebih baik.",
+  INTP: "INTP adalah pemikir logis dan analitis yang senang mengeksplorasi ide abstrak. Mereka sering tertarik pada teori dan solusi inovatif.",
+  
+  ESTP: "ESTP adalah orang yang energik, spontan, dan penuh aksi. Mereka suka memecahkan masalah secara langsung dan menikmati pengalaman baru.",
+  ESFP: "ESFP adalah pribadi yang ceria, hangat, dan sangat sosial. Mereka menikmati momen saat ini dan senang menghibur orang di sekitar mereka.",
+  ENFP: "ENFP adalah individu yang penuh semangat, kreatif, dan ekspresif. Mereka sangat peduli dengan orang lain dan ingin mengejar makna hidup.",
+  ENTP: "ENTP adalah inovator yang cerdas, penuh rasa ingin tahu, dan suka debat sehat. Mereka senang mengeksplorasi kemungkinan dan berpikir out of the box.",
+  
+  ESTJ: "ESTJ adalah pemimpin alami yang logis, tegas, dan menghargai keteraturan. Mereka suka mengatur sistem dan memastikan semuanya berjalan efisien.",
+  ESFJ: "ESFJ adalah tipe yang ramah, terorganisir, dan peduli pada keharmonisan sosial. Mereka senang menjaga hubungan dan mendukung orang lain.",
+  ENFJ: "ENFJ adalah komunikator ulung yang hangat, penuh empati, dan memotivasi. Mereka pandai memimpin dan menginspirasi kelompok menuju tujuan bersama.",
+  ENTJ: "ENTJ adalah tipe yang ambisius, percaya diri, dan sangat terarah. Mereka unggul dalam merancang strategi dan mengambil alih kepemimpinan."
+
+};
+
+const MBTIImages = {
+  ISTJ: "https://i.pinimg.com/736x/36/5a/15/365a154327362419bbd17449a70b2713.jpg",
+  ISFJ: "https://i.pinimg.com/736x/e0/83/32/e0833218cb581ddd5e2ef23b901bc74b.jpg",
+  INFJ: "https://i.pinimg.com/736x/fd/07/b4/fd07b471daa477b754d944ab5760bc75.jpg",
+  INTJ: "https://i.pinimg.com/736x/4d/b2/5b/4db25b66fb6a8a488d91d6a96827014c.jpg",
+  ISTP: "https://i.pinimg.com/736x/4c/e6/62/4ce662c9e1117745bddca5a15f0a4307.jpg",
+  ISFP: "https://i.pinimg.com/736x/00/19/1b/00191b490a29d450d67f881e2e27b8de.jpg",
+  INFP: "https://i.pinimg.com/736x/ee/6f/ad/ee6fadc3f14d53eeea88559ea8ff1909.jpg",
+  INTP: "https://i.pinimg.com/736x/cf/2f/02/cf2f0231b598da88563e6516a0fb5164.jpg",
+  ESTP: "https://i.pinimg.com/736x/f1/5d/5e/f15d5eeb77a6f77d6e18a86ca46c9701.jpg",
+  ESFP: "https://i.pinimg.com/736x/f3/dc/d9/f3dcd9c94642ffff9c88e52ebaef2355.jpg",
+  ENFP: "https://i.pinimg.com/736x/f1/5a/86/f15a86983905e9011bdf24bc30feb631.jpg",
+  ENTP: "https://i.pinimg.com/736x/0a/0f/98/0a0f9861bb91712225f7d8f683467582.jpg",
+  ESTJ: "https://i.pinimg.com/736x/27/cb/af/27cbaf0967c584c39da44f01a4e94ac8.jpg",
+  ESFJ: "https://i.pinimg.com/736x/d1/cd/5e/d1cd5e697e0c5b4265c32d7a2b7f54a4.jpg",
+  ENFJ: "https://i.pinimg.com/736x/1e/39/bf/1e39bf3d1919f70d646073d07515bf24.jpg",
+  ENTJ: "https://i.pinimg.com/736x/41/fb/e4/41fbe49be6e1f9efa19ce26c16a97911.jpg"
+};
+
+
+export { questionsEI, questionsNS, questionsTF, questionsPJ, mbtiDescriptions, MBTIImages };
