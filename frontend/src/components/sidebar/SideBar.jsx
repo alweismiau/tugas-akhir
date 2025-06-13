@@ -14,8 +14,9 @@ const SideBar = ({
   startNewChat,
   loadChatHistory,
   deleteChatHistory,
-  deleteAllHistories,
+  // deleteAllHistories,
   setChatHistories,
+  refreshKey,
 }) => {
   const [user, setUser] = useState(null);
   const [fetchedHistories, setFetchedHistories] = useState([]);
@@ -43,15 +44,21 @@ const SideBar = ({
         });
         const data = Array.isArray(response.data) ? response.data : [];
 
-        setFetchedHistories(data);
-        setChatHistories(data);
+        // setFetchedHistories(data);
+        // setChatHistories(data);
+                const sortedData = [...data].sort(
+          (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
+        );
+
+        setFetchedHistories(sortedData);
+        setChatHistories(sortedData);
       } catch (error) {
         console.error("❌ Gagal mengambil data user atau riwayat:", error);
       }
     }
 
     fetchUserAndChatHistories();
-  }, [navigate, setChatHistories]);
+  }, [navigate, setChatHistories, refreshKey]);
 
   if (!user) return <p>Loading...</p>;
 

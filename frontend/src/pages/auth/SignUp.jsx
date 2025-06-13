@@ -90,7 +90,7 @@ const Signup = () => {
         <form onSubmit={handleSubmit}>
           <FormFields
             fields={[
-              { name: "name", label: "Nama Panjang" },
+              { name: "name", label: "Nama" },
               { name: "email", label: "Alamat Email", type: "email" },
               { name: "password", label: "Password", type: "password" },
             ]}

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { fetchUserProfile, isAuthenticated } from "../../auth";
@@ -35,84 +35,53 @@ const Chatbot = () => {
   const [currentChatId, setCurrentChatId] = useState(null);
   const navigate = useNavigate();
   const [error, setError] = useState("");
+  const [refreshKey, setRefreshKey] = useState(0);
+  const messagesEndRef = useRef(null);
   const FLASK_URL = "https://upward-midge-verbally.ngrok-free.app";
   const EXPRESS_URL = "https://brave-wired-mastiff.ngrok-free.app";
 
   useEffect(() => {
     async function fetchProfile() {
       if (!isAuthenticated()) {
-        console.log("User not authenticated, redirecting to Sign In");
         navigate("/signin");
         return;
       }
-
       const getUserById = await fetchUserProfile();
-      console.log("User Profile Data:", getUserById);
       if (!getUserById) {
         navigate("/signin");
       } else {
         setUser(getUserById);
-        // const storedHistories =
-        //   JSON.parse(
-        //     localStorage.getItem(`chatHistories_${getUserById.user.id}`)
-        //   ) || [];
-
-        // setChatHistories(storedHistories);
         const response = await axios.get(
           `${EXPRESS_URL}/get-chats/${getUserById.user.id}`
         );
         setChatHistories(response.data);
-
-        startNewChat();
+        if (response.data.length > 0) {
+          const lastChat = response.data[response.data.length - 1];
+          loadChatHistory(lastChat.id);
+        } else {
+          startNewChat();
+        }
       }
     }
     fetchProfile();
   }, [navigate]);
+
+  useEffect(() => {
+    if (messages.length === 0 && currentChatId === null) {
+      startNewChat();
+    }
+  }, [messages, currentChatId]);
 
   const startNewChat = () => {
     setMessages([]);
     setSummary("");
     setSessionEnded(false);
     setCurrentChatId(Date.now().toString());
+    setRefreshKey((prev) => prev + 1);
   };
 
-  const saveCurrentChat = () => {
-    if (messages.length === 0) return;
-
-    const updatedHistories = [...chatHistories];
-    const chatEntry = {
-      id: currentChatId,
-      messages,
-      summary,
-      timestamp: new Date().toISOString(),
-    };
-
-    const existingIndex = updatedHistories.findIndex(
-      (h) => h.id === currentChatId
-    );
-    if (existingIndex !== -1) {
-      updatedHistories[existingIndex] = chatEntry;
-    } else {
-      updatedHistories.push(chatEntry);
-    }
-
-    setChatHistories(updatedHistories);
-    // localStorage.setItem(
-    //   `chatHistories_${user.user.id}`,
-    //   JSON.stringify(updatedHistories)
-    // );
-  };
-
-  // const loadChatHistory = (chatId) => {
-  //   const chat = chatHistories.find((h) => h.id === chatId);
-  //   if (chat) {
-  //     setMessages(chat.messages);
-  //     setSummary(chat.summary || "");
-  //     setSessionEnded(!!chat.summary);
-  //     setCurrentChatId(chatId);
-  //   }
-  // };
   const loadChatHistory = (chatId) => {
+    if (currentChatId === chatId) return;
     const chat = chatHistories.find((h) => h.id === chatId);
     if (chat) {
       setMessages(chat.messages);
@@ -123,117 +92,110 @@ const Chatbot = () => {
   };
 
   const deleteChatHistory = async (chatId) => {
-  try {
-    await axios.delete(`${EXPRESS_URL}/delete-chat/${chatId}`);
-    const updatedHistories = chatHistories.filter((h) => h.id !== chatId);
-    setChatHistories(updatedHistories);
-    if (currentChatId === chatId) {
-      startNewChat();
-    }
-  } catch (err) {
-    console.error("Gagal menghapus chat:", err);
-  }
-};
-
-const deleteAllHistories = async () => {
-  try {
-    await axios.delete(`${EXPRESS_URL}/delete-all-chats/${user.user.id}`);
-    setChatHistories([]);
-    startNewChat();
-  } catch (err) {
-    console.error("Gagal menghapus semua riwayat:", err);
-  }
-};
-
-
-  const handleSendMessage = async () => {
-    if (input.trim() === "") return;
-
-    setLoading(true);
-    setInput("");
-
     try {
-      const mbtiResult = user.user.mbtiResult || "INTJ";
-
-      const response = await axios.post(
-        `${FLASK_URL}/chat`,
-        {
-          user_input: input,
-          mbti_result: mbtiResult,
-          user_id: user.user.id || "anonymous",
-          chat_id: currentChatId,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      const { emotion, response: botReply, response_time } = response.data;
-
-      const userMessage = {
-        text: input,
-        sender: "user",
-        emotion: emotion,
-      };
-
-      const botMessage = {
-        text: botReply,
-        sender: "bot",
-        response_time,
-      };
-
-      await axios.post(`${EXPRESS_URL}/save-chat`, {
-        userId: user.user.id,
-        chatId: currentChatId,
-        text: input,
-        response: botReply,
-        emotion: emotion,
-        responseTime: response_time,
-      });
-
-      setMessages((prev) => {
-        const updatedMessages = [...prev, userMessage, botMessage];
-        // const updatedMessages = [...prev, newMessages];
-        const updatedHistories = [...chatHistories];
-        const chatEntry = {
-          id: currentChatId,
-          messages: updatedMessages,
-          summary,
-          timestamp: new Date().toISOString(),
-        };
-        const existingIndex = updatedHistories.findIndex(
-          (h) => h.id === currentChatId
-        );
-        if (existingIndex !== -1) {
-          updatedHistories[existingIndex] = chatEntry;
-        } else {
-          updatedHistories.push(chatEntry);
-        }
-        setChatHistories(updatedHistories);
-        // localStorage.setItem(
-        //   `chatHistories_${user.user.id}`,
-        //   JSON.stringify(updatedHistories)
-        // );
-        return updatedMessages;
-      });
-    } catch (error) {
-      console.error("Error fetching chatbot response:", error);
-      setMessages((prev) => [
-        ...prev,
-        {
-          text: "Maaf, terjadi kesalahan pada server.",
-          sender: "bot",
-          emotion: "error",
-        },
-      ]);
-    } finally {
-      setLoading(false);
+      await axios.delete(`${EXPRESS_URL}/delete-chat/${chatId}`);
+      setRefreshKey((prev) => prev + 1);
+      const updatedHistories = chatHistories.filter((h) => h.id !== chatId);
+      setChatHistories(updatedHistories);
+      if (currentChatId === chatId) {
+        startNewChat();
+      }
+    } catch (err) {
+      console.error("Gagal menghapus chat:", err);
     }
   };
 
-  
+const handleSendMessage = async () => {
+  if (input.trim() === "") return;
+  const userInput = input;
+  setInput("");
+
+  const userMessage = {
+    text: userInput,
+    sender: "user",
+    emotion: null 
+  };
+  setMessages((prev) => [...prev, userMessage]);
+
+  const loadingMessage = {
+    text: "Sedang memproses...",
+    sender: "bot",
+    emotion: null,
+    responseTime: null,
+    loading: true
+  };
+  setMessages((prev) => [...prev, loadingMessage]);
+
+  try {
+    setLoading(true);
+    const mbtiResult = user.user.mbtiResult || "INTJ";
+    const response = await axios.post(`${FLASK_URL}/chat`, {
+      user_input: userInput,
+      mbti_result: mbtiResult,
+      user_id: user.user.id || "anonymous",
+      chat_id: currentChatId,
+    });
+
+    const { emotion, response: botReply, responseTime } = response.data;
+
+    setMessages((prev) => {
+      const updated = [...prev];
+      const lastUserIndex = updated.findIndex((msg) => msg.sender === "user" && msg.emotion === null);
+      if (lastUserIndex !== -1) {
+        updated[lastUserIndex] = {
+          ...updated[lastUserIndex],
+          emotion: emotion
+        };
+      }
+      updated.splice(updated.length - 1, 1); 
+      updated.push({
+        text: botReply,
+        sender: "bot",
+        emotion: null,
+        responseTime: responseTime
+      });
+
+      return updated;
+    });
+  } catch (error) {
+    console.error("Error fetching chatbot response:", error);
+    setMessages((prev) => {
+      const updated = [...prev];
+      updated.splice(updated.length - 1, 1); 
+      updated.push({
+        text: "Maaf, terjadi kesalahan pada server.",
+        sender: "bot",
+        emotion: "error"
+      });
+      return updated;
+    });
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+  const saveCurrentChat = () => {
+    if (messages.length === 0) return;
+    const updatedHistories = [...chatHistories];
+    const chatEntry = {
+      id: currentChatId,
+      messages,
+      summary,
+      timestamp: new Date().toISOString(),
+    };
+    const alreadyExists = updatedHistories.some((h) => h.id === currentChatId);
+    if (!alreadyExists) {
+      updatedHistories.push(chatEntry);
+    } else {
+      updatedHistories.forEach((h, i) => {
+        if (h.id === currentChatId) {
+          updatedHistories[i] = chatEntry;
+        }
+      });
+    }
+    setChatHistories(updatedHistories);
+  };
 
   useEffect(() => {
     if (sessionEnded && summary) {
@@ -244,31 +206,11 @@ const deleteAllHistories = async () => {
   const handleEndSession = async () => {
     setSessionEnded(true);
     setLoading(true);
-
     try {
-      if (!user || !user.user.id || !currentChatId) {
-        throw new Error("User ID or Chat ID is missing");
-      }
-
-      console.log(
-        "Sending summary request with user_id:",
-        user.user.id,
-        "chat_id:",
-        currentChatId
-      );
-      const response = await axios.post(
-        `${FLASK_URL}/summary`,
-        {
-          user_id: user.user.id,
-          chat_id: currentChatId,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
+      const response = await axios.post(`${FLASK_URL}/summary`, {
+        user_id: user.user.id,
+        chat_id: currentChatId,
+      });
       const { summary: backendSummary } = response.data;
       if (
         backendSummary &&
@@ -280,16 +222,30 @@ const deleteAllHistories = async () => {
         setSummary("");
       }
     } catch (error) {
-      console.error(
-        "Error fetching summary:",
-        error.response ? error.response.data : error.message
-      );
+      console.error("Error fetching summary:", error);
       setError("Gagal memuat rangkuman dari server.");
       setSummary("");
     } finally {
       setLoading(false);
     }
   };
+
+  const renderTextWithBold = (text) => {
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+
+    return parts.map((part, index) => {
+      if (part.startsWith("**") && part.endsWith("**")) {
+        return <strong key={index}>{part.slice(2, -2)}</strong>;
+      }
+      return <span key={index}>{part}</span>;
+    });
+  };
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   if (!user) return <p>Loading...</p>;
 
@@ -335,40 +291,26 @@ const deleteAllHistories = async () => {
             flexDirection: "column",
           }}
         >
-          {/* <SideBar /> */}
-          {/* <SideBar
-            startNewChat={startNewChat}
-            chatHistories={chatHistories}
-            loadChatHistory={loadChatHistory}
-            deleteChatHistory={deleteChatHistory}
-            deleteAllHistories={deleteAllHistories}
-          /> */}
           <SideBar
             startNewChat={startNewChat}
             chatHistories={chatHistories}
             setChatHistories={setChatHistories}
             loadChatHistory={loadChatHistory}
             deleteChatHistory={deleteChatHistory}
-            deleteAllHistories={deleteAllHistories}
+            // deleteAllHistories={deleteAllHistories}
+            refreshKey={refreshKey}
           />
         </Box>
 
         <Drawer anchor="left" open={open} onClose={() => setOpen(false)}>
-          {/* <SideBar /> */}
-          {/* <SideBar
-            startNewChat={startNewChat}
-            chatHistories={chatHistories}
-            loadChatHistory={loadChatHistory}
-            deleteChatHistory={deleteChatHistory}
-            deleteAllHistories={deleteAllHistories}
-          /> */}
           <SideBar
             startNewChat={startNewChat}
             chatHistories={chatHistories}
             setChatHistories={setChatHistories}
             loadChatHistory={loadChatHistory}
             deleteChatHistory={deleteChatHistory}
-            deleteAllHistories={deleteAllHistories}
+            // deleteAllHistories={deleteAllHistories}
+            refreshKey={refreshKey}
           />
         </Drawer>
 
@@ -390,6 +332,7 @@ const deleteAllHistories = async () => {
           )}
           <Box
             className="chat-container"
+            ref={messagesEndRef}
             sx={{
               flex: 1,
               width: "100%",
@@ -446,9 +389,10 @@ const deleteAllHistories = async () => {
                       color="grey.500"
                       sx={{ mb: 1, textAlign: "right" }}
                     >
-                      Emosi: {msg.emotion || "unknown"}
+                      Emosi: {msg.emotion || "Sedang memproses..."}
                     </Typography>
                   )}
+                
                   {msg.sender === "bot" && (
                     <Typography
                       variant="body2"
@@ -456,18 +400,19 @@ const deleteAllHistories = async () => {
                       color="grey.500"
                       sx={{ mb: 1 }}
                     >
-                      Waktu: {msg.response_time || "N/A"}s
+                      Waktu: {msg.responseTime || "Sedang memproses... "}s
                     </Typography>
                   )}
-                  {msg.text}
+                  {/* {msg.text} */}
+                  {renderTextWithBold(msg.text)}
                 </Box>
               ))
             )}
-            {loading && (
+            {/* {loading && (
               <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
                 <CircularProgress color="primary" />
               </Box>
-            )}
+            )} */}
             {/* End Session */}
             {messages.length > 0 && !sessionEnded && (
               <CustomButton
@@ -549,6 +494,8 @@ const deleteAllHistories = async () => {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
               disabled={loading || sessionEnded}
+              multiline
+              maxRows={5}
               sx={{
                 input: { color: sessionEnded ? "grey.800" : "grey.800" },
                 "& fieldset": {

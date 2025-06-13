@@ -120,7 +120,7 @@ const questionsNS = [
     ],
   },
   {
-    question: "Menurut, orang tidak akan dapat hidup tanpa…",
+    question: "Menurutmu, orang tidak akan dapat hidup tanpa…",
     options: [
       { text: "Prinsip", value: "N" },
       { text: "Fakta", value: "S" },
